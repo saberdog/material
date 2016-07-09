@@ -710,7 +710,7 @@ MdPanelService.prototype.open = function(opt_config) {
  * @returns {MdPanelPosition}
  */
 MdPanelService.prototype.newPanelPosition = function() {
-  return new MdPanelPosition(this._$window);
+  return new MdPanelPosition(this._$window, this._$injector);
 };
 
 
@@ -1531,11 +1531,15 @@ MdPanelRef.prototype._done = function(callback, self) {
  * });
  *
  * @param {!angular.$window} $window
+ * @param {!angular.$injector} $injector
  * @final @constructor
  */
-function MdPanelPosition($window) {
+function MdPanelPosition($window, $injector) {
   /** @private @const */
   this._$window = $window;
+  
+  /** @private @const {!angular.$mdUtil} */
+  this._$mdUtil = $injector.get('$mdUtil');
 
   /** @private {boolean} */
   this._absolute = false;
@@ -1950,13 +1954,26 @@ MdPanelPosition.prototype._calculatePanelPosition = function(panelEl, position) 
   var targetRight = targetBounds.right;
   var targetWidth = targetBounds.width;
 
+  function reverseXPosition (position) {
+    var start = 'start';
+    var end = 'end';
+
+    if (position.includes(start)) {
+      return position.replace(start, end);
+    }
+
+    return position.replace(end, start);
+  }
+
+  if (this._$mdUtil.bidi() === 'rtl') {
+    position.x = reverseXPosition(position.x);
+  }
+
   switch (position.x) {
     case MdPanelPosition.xPosition.OFFSET_START:
-      // TODO(ErinCoughlan): Change OFFSET_START for rtl vs ltr.
       this._left = targetLeft - panelWidth + 'px';
       break;
     case MdPanelPosition.xPosition.ALIGN_END:
-      // TODO(ErinCoughlan): Change ALIGN_END for rtl vs ltr.
       this._left = targetRight - panelWidth + 'px';
       break;
     case MdPanelPosition.xPosition.CENTER:
@@ -1964,11 +1981,9 @@ MdPanelPosition.prototype._calculatePanelPosition = function(panelEl, position) 
       this._left = left + 'px';
       break;
     case MdPanelPosition.xPosition.ALIGN_START:
-      // TODO(ErinCoughlan): Change ALIGN_START for rtl vs ltr.
       this._left = targetLeft + 'px';
       break;
     case MdPanelPosition.xPosition.OFFSET_END:
-      // TODO(ErinCoughlan): Change OFFSET_END for rtl vs ltr.
       this._left = targetRight + 'px';
       break;
   }
