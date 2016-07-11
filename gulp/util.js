@@ -205,6 +205,6 @@ function themeBuildStream() {
   return gulp.src( config.themeBaseFiles.concat(path.join(config.paths, '*-theme.scss')) )
       .pipe(concat('default-theme.scss'))
       .pipe(utils.hoistScssVariables())
-      .pipe(sass())
+      .pipe(sass({outputStyle: 'compressed'}))
       .pipe(utils.cssToNgConstant('material.core', '$MD_THEME_CSS'));
 }
